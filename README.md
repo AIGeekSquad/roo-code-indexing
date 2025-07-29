@@ -1,6 +1,6 @@
 # Roo Code Indexing Docker Setup
 
-A production-ready Docker setup for local code indexing using Qdrant vector database and Ollama for embeddings. This configuration provides a self-contained environment for the Roo code indexing system.
+A production-ready Docker setup for local code indexing using Qdrant vector database and Ollama for embeddings. This configuration provides a self-contained environment for the Roo code indexing system. See (roo)[https://docs.roocode.com/features/codebase-indexing?utm_source=extension&utm_medium=ide&utm_campaign=settings]
 
 ## 🚀 Quick Start
 
