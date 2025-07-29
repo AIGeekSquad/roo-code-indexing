@@ -152,15 +152,45 @@ docker-compose restart ollama
 
 ### Auto-start with System Boot
 
-#### Linux (systemd)
+The services are configured with `restart: unless-stopped` in the [`docker-compose.yml`](docker-compose.yml:16), which means they will automatically restart if they crash or if Docker restarts. To enable full auto-start on system boot across any operating system:
 
-1. Create a systemd service file:
+#### Simple Cross-Platform Setup
+
+1. **Configure Docker to start at login/boot**:
+   - **Windows**: Docker Desktop → Settings → General → "Start Docker Desktop when you log in"
+   - **macOS**: Docker Desktop → Settings → General → "Start Docker Desktop when you log in"
+   - **Linux**: Enable Docker service: `sudo systemctl enable docker`
+
+2. **Start the services once**:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **That's it!** The services will now:
+   - Start automatically when Docker starts (at system boot/login)
+   - Restart automatically if they crash or stop unexpectedly
+   - Continue running until you explicitly stop them with `docker-compose down`
+
+#### How It Works
+
+The [`docker-compose.yml`](docker-compose.yml:16) includes `restart: unless-stopped` for both services, which means:
+- Services restart automatically if they exit unexpectedly
+- Services start automatically when Docker daemon starts
+- Services only stop when explicitly stopped with `docker-compose down`
+- Services survive system reboots as long as Docker starts automatically
+
+#### Advanced Platform-Specific Options
+
+If you need more control, you can also use platform-specific service management:
+
+<details>
+<summary>Linux (systemd) - Click to expand</summary>
+
+Create a systemd service for more granular control:
+
 ```bash
-sudo nano /etc/systemd/system/roo-indexing.service
-```
-
-2. Add the following content:
-```ini
+# Create service file
+sudo tee /etc/systemd/system/roo-indexing.service > /dev/null <<EOF
 [Unit]
 Description=Roo Code Indexing Services
 Requires=docker.service
@@ -169,43 +199,69 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/path/to/your/roo-docker-setup
-ExecStart=/usr/local/bin/docker-compose up -d
-ExecStop=/usr/local/bin/docker-compose down
+WorkingDirectory=$(pwd)
+ExecStart=/usr/bin/docker-compose up -d
+ExecStop=/usr/bin/docker-compose down
 TimeoutStartSec=0
 
 [Install]
 WantedBy=multi-user.target
-```
+EOF
 
-3. Enable the service:
-```bash
+# Enable and start
 sudo systemctl enable roo-indexing.service
 sudo systemctl start roo-indexing.service
 ```
+</details>
 
-#### Windows
+<details>
+<summary>Windows (Task Scheduler) - Click to expand</summary>
 
-1. Create a batch file `start-roo.bat`:
-```batch
-@echo off
-cd /d "C:\path\to\your\roo-docker-setup"
-docker-compose up -d
-```
+For more control than Docker Desktop's auto-start:
 
-2. Add to Windows startup folder or create a scheduled task
+1. Open Task Scheduler
+2. Create Basic Task → "Start Roo Indexing"
+3. Trigger: "When the computer starts"
+4. Action: "Start a program"
+5. Program: `docker-compose`
+6. Arguments: `up -d`
+7. Start in: `C:\path\to\your\roo-docker-setup`
+</details>
 
-#### macOS
+<details>
+<summary>macOS (launchd) - Click to expand</summary>
 
-1. Create a launch agent plist file:
+Create a launch daemon for system-level startup:
+
 ```bash
-nano ~/Library/LaunchAgents/com.roo.indexing.plist
-```
+# Create plist file
+sudo tee /Library/LaunchDaemons/com.roo.indexing.plist > /dev/null <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.roo.indexing</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/docker-compose</string>
+        <string>up</string>
+        <string>-d</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>$(pwd)</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>
+EOF
 
-2. Add the plist content and load it:
-```bash
-launchctl load ~/Library/LaunchAgents/com.roo.indexing.plist
+# Load the service
+sudo launchctl load /Library/LaunchDaemons/com.roo.indexing.plist
 ```
+</details>
 
 ## ✅ Verification
 
