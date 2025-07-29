@@ -1,0 +1,77 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: roo-qdrant
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=${QDRANT_LOG_LEVEL:-INFO}
+    networks:
+      - roo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: ${QDRANT_MEMORY_LIMIT:-4G}
+        reservations:
+          memory: ${QDRANT_MEMORY_RESERVATION:-2G}
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: roo-ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    networks:
+      - roo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${OLLAMA_MEMORY_LIMIT:-24G}
+        reservations:
+          memory: ${OLLAMA_MEMORY_RESERVATION:-16G}
+    # Uncomment the following lines if you have NVIDIA GPU support
+    # runtime: nvidia
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all
+
+volumes:
+  qdrant_storage:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${QDRANT_STORAGE_PATH:-./data/qdrant}
+  ollama_models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${OLLAMA_MODELS_PATH:-./data/ollama}
+
+networks:
+  roo-network:
+    driver: bridge
+    name: roo-code-indexing
