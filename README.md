@@ -6,11 +6,14 @@ A production-ready Docker setup for local code indexing using Qdrant vector data
 
 1. **Clone or download this repository**
 2. **Configure your environment** (optional):
+
    ```bash
    cp .env.example .env
    # Edit .env to customize settings
    ```
+
 3. **Run the setup script**:
+
    ```bash
    # On Linux/macOS:
    chmod +x setup.sh
@@ -29,11 +32,13 @@ A production-ready Docker setup for local code indexing using Qdrant vector data
 ## 📋 System Requirements
 
 ### Memory Requirements
+
 - **Minimum**: 16GB RAM (for `nomic-embed-text` model)
 - **Recommended**: 24GB RAM (for `mxbai-embed-large` model)
 - **Storage**: 10GB+ free space for models and data
 
 ### Software Requirements
+
 - Docker 20.10+
 - Docker Compose 2.0+
 - curl (for health checks)
@@ -43,18 +48,21 @@ A production-ready Docker setup for local code indexing using Qdrant vector data
 Choose between two embedding models based on your system capabilities:
 
 ### nomic-embed-text (Default)
+
 - **Dimensions**: 768
 - **Memory**: 16GB minimum
 - **Performance**: Good balance of speed and quality
 - **Best for**: Most users, smaller systems
 
 ### mxbai-embed-large
+
 - **Dimensions**: 1024
 - **Memory**: 24GB minimum
 - **Performance**: Higher quality embeddings
 - **Best for**: High-end systems, maximum quality
 
 To change the model, edit the `EMBEDDING_MODEL` variable in your `.env` file:
+
 ```bash
 # For nomic-embed-text (default)
 EMBEDDING_MODEL=nomic-embed-text
@@ -162,6 +170,7 @@ The services are configured with `restart: unless-stopped` in the [`docker-compo
    - **Linux**: Enable Docker service: `sudo systemctl enable docker`
 
 2. **Start the services once**:
+
    ```bash
    docker-compose up -d
    ```
@@ -174,6 +183,7 @@ The services are configured with `restart: unless-stopped` in the [`docker-compo
 #### How It Works
 
 The [`docker-compose.yml`](docker-compose.yml:16) includes `restart: unless-stopped` for both services, which means:
+
 - Services restart automatically if they exit unexpectedly
 - Services start automatically when Docker daemon starts
 - Services only stop when explicitly stopped with `docker-compose down`
@@ -212,6 +222,7 @@ EOF
 sudo systemctl enable roo-indexing.service
 sudo systemctl start roo-indexing.service
 ```
+
 </details>
 
 <details>
@@ -226,6 +237,7 @@ For more control than Docker Desktop's auto-start:
 5. Program: `docker-compose`
 6. Arguments: `up -d`
 7. Start in: `C:\path\to\your\roo-docker-setup`
+
 </details>
 
 <details>
@@ -261,6 +273,7 @@ EOF
 # Load the service
 sudo launchctl load /Library/LaunchDaemons/com.roo.indexing.plist
 ```
+
 </details>
 
 ## ✅ Verification
@@ -278,23 +291,26 @@ docker-compose logs qdrant
 docker-compose logs ollama
 
 # Manual health checks
-curl http://localhost:6333/health
+curl http://localhost:6333/readyz
 curl http://localhost:11434/api/tags
 ```
 
 ### Testing the Setup
 
 1. **Verify Qdrant is accessible**:
+
    ```bash
    curl -X GET http://localhost:6333/collections
    ```
 
 2. **Verify Ollama has the embedding model**:
+
    ```bash
    curl http://localhost:11434/api/tags
    ```
 
 3. **Test embedding generation**:
+
    ```bash
    curl -X POST http://localhost:11434/api/embeddings \
      -H "Content-Type: application/json" \
@@ -307,6 +323,7 @@ curl http://localhost:11434/api/tags
 ### Using the Setup Scripts
 
 #### Linux/macOS (Bash)
+
 The bash setup script provides additional verification options:
 
 ```bash
@@ -321,6 +338,7 @@ The bash setup script provides additional verification options:
 ```
 
 #### Windows (PowerShell)
+
 The PowerShell setup script provides the same functionality:
 
 ```powershell
@@ -344,12 +362,14 @@ The PowerShell setup script provides the same functionality:
 #### Services Won't Start
 
 1. **Check Docker is running**:
+
    ```bash
    docker --version
    docker-compose --version
    ```
 
 2. **Check port conflicts**:
+
    ```bash
    # Check if ports are in use
    netstat -an | grep 6333
@@ -357,6 +377,7 @@ The PowerShell setup script provides the same functionality:
    ```
 
 3. **Check available memory**:
+
    ```bash
    free -h  # Linux
    # Ensure you have enough RAM for your chosen model
@@ -365,6 +386,7 @@ The PowerShell setup script provides the same functionality:
 #### Ollama Model Issues
 
 1. **Model not found**:
+
    ```bash
    # Pull model manually
    docker exec roo-ollama ollama pull nomic-embed-text
@@ -378,11 +400,13 @@ The PowerShell setup script provides the same functionality:
 #### Qdrant Connection Issues
 
 1. **Check Qdrant logs**:
+
    ```bash
    docker-compose logs qdrant
    ```
 
 2. **Reset Qdrant data**:
+
    ```bash
    docker-compose down
    rm -rf ./data/qdrant
@@ -392,6 +416,7 @@ The PowerShell setup script provides the same functionality:
 #### Permission Issues
 
 1. **Linux/macOS**:
+
    ```bash
    # Fix data directory permissions
    sudo chown -R $USER:$USER ./data
@@ -405,6 +430,7 @@ The PowerShell setup script provides the same functionality:
 ### Performance Optimization
 
 1. **Increase memory limits** in `.env`:
+
    ```bash
    OLLAMA_MEMORY_LIMIT=32G
    QDRANT_MEMORY_LIMIT=8G
@@ -413,6 +439,7 @@ The PowerShell setup script provides the same functionality:
 2. **Use SSD storage** for better I/O performance
 
 3. **Enable GPU support** (NVIDIA only):
+
    ```bash
    # Uncomment GPU lines in docker-compose.yml
    # Ensure nvidia-docker is installed
@@ -439,6 +466,7 @@ docker stats
 1. Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
 2. Uncomment GPU configuration in `docker-compose.yml`:
+
    ```yaml
    runtime: nvidia
    environment:
@@ -468,14 +496,16 @@ For production deployments:
 ## 📚 API Documentation
 
 ### Qdrant API
-- **Web UI**: http://localhost:6333/dashboard
-- **API Docs**: http://localhost:6333/docs
-- **Collections**: http://localhost:6333/collections
+
+- **Web UI**: <http://localhost:6333/dashboard>
+- **API Docs**: <http://localhost:6333/docs>
+- **Collections**: <http://localhost:6333/collections>
 
 ### Ollama API
-- **Models**: http://localhost:11434/api/tags
-- **Generate**: http://localhost:11434/api/generate
-- **Embeddings**: http://localhost:11434/api/embeddings
+
+- **Models**: <http://localhost:11434/api/tags>
+- **Generate**: <http://localhost:11434/api/generate>
+- **Embeddings**: <http://localhost:11434/api/embeddings>
 
 ## 🤝 Contributing
 
@@ -499,6 +529,7 @@ If you encounter issues:
 4. Verify network connectivity and ports
 
 For additional support, please create an issue with:
+
 - System specifications
 - Error messages
 - Docker and Docker Compose versions

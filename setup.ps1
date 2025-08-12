@@ -78,7 +78,7 @@ function Test-Requirements {
         Write-Error "Docker Compose is not available. Please ensure Docker Desktop is properly installed."
         exit 1
     }
-    
+
     # Check available memory (Windows)
     try {
         $totalMemoryGB = [math]::Round((Get-CimInstance -ClassName Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
@@ -164,7 +164,7 @@ function Wait-ForServices {
     $qdrantHealthy = $false
     for ($i = 1; $i -le 30; $i++) {
         try {
-            $response = Invoke-WebRequest -Uri "http://localhost:6333/health" -UseBasicParsing -TimeoutSec 5
+            $response = Invoke-WebRequest -Uri "http://localhost:6333/readyz" -UseBasicParsing -TimeoutSec 5
             if ($response.StatusCode -eq 200) {
                 Write-Success "Qdrant is healthy"
                 $qdrantHealthy = $true
