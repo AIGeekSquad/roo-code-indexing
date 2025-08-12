@@ -58,18 +58,8 @@ services:
     #   - NVIDIA_VISIBLE_DEVICES=all
 
 volumes:
-  qdrant_storage:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${QDRANT_STORAGE_PATH:-./data/qdrant}
-  ollama_models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${OLLAMA_MODELS_PATH:-./data/ollama}
+  qdrant_storage:   # now a real Docker volume (inside Docker Desktop's Linux VM)
+  ollama_models:    # same here
 
 networks:
   roo-network:

@@ -125,7 +125,7 @@ wait_for_services() {
     # Wait for Qdrant
     print_status "Checking Qdrant health..."
     for i in {1..30}; do
-        if curl -s http://localhost:6333/health >/dev/null 2>&1; then
+        if curl -s http://localhost:6333/readyz >/dev/null 2>&1; then
             print_success "Qdrant is healthy"
             break
         fi
